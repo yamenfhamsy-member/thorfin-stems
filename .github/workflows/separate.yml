@@ -56,6 +56,7 @@ jobs:
       - name: Install CPU torch + demucs
         run: |
           pip install --upgrade pip
+          pip install numpy
           pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
           pip install demucs
 
