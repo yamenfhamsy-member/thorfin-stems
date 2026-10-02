@@ -100,9 +100,23 @@ jobs:
           cp "$n" stems/instrumental.wav
           ls -la stems/
 
+      - name: Encode stems to MP3 (small files for Telegram)
+        run: |
+          pip install imageio-ffmpeg
+          FF=$(python -c "import imageio_ffmpeg; print(imageio_ffmpeg.get_ffmpeg_exe())")
+          if ! "$FF" -hide_banner -encoders 2>/dev/null | grep -q libmp3lame; then FF=ffmpeg; fi
+          mkdir -p mp3
+          for stem in vocals instrumental; do
+            "$FF" -y -hide_banner -loglevel error \
+              -i "stems/${stem}.wav" -vn -c:a libmp3lame -b:a 128k "mp3/${JOB_ID}_${stem}.mp3"
+          done
+          ls -la mp3/
+        env:
+          JOB_ID: ${{ inputs.job_id }}
+
       - name: Upload stems artifact
         uses: actions/upload-artifact@v4
         with:
           name: stems-${{ inputs.job_id }}
-          path: stems/
+          path: mp3/
           retention-days: 7
